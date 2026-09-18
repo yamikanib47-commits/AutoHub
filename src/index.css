@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #ECEFF2;
+    color: #1A1A1F;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .font-mono-timer {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Diagonal hatched accent stripes for analytics bars - BLUE THEMED */
+.bg-hatched-blue {
+  background-color: #E2E8F0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #93C5FD,
+    #93C5FD 2.5px,
+    #E2E8F0 2.5px,
+    #E2E8F0 7px
+  );
+}
+
+.bg-hatched-blue-dark {
+  background-color: #DBEAFE;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #3B82F6,
+    #3B82F6 3px,
+    #DBEAFE 3px,
+    #DBEAFE 8px
+  );
+}
+
+/* Abstract dark blue wavy background for Time Tracker and Mobile App cards */
+.bg-dark-wave {
+  background-color: #0F172A;
+  background-image: 
+    radial-gradient(ellipse at 80% 90%, rgba(37, 99, 235, 0.45) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 10%, rgba(29, 78, 216, 0.35) 0%, transparent 50%),
+    repeating-radial-gradient(circle at 100% 100%, transparent 0, #0F172A 12px, transparent 13px, transparent 20px);
+}

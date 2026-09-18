@@ -1,0 +1,7 @@
+{
+  "name": "Autoace Hub",
+  "description": "Operations and project management command hub for Yamikani Banda (Head Admin).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
