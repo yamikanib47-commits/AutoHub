@@ -2,6 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, 
   Target,
+  FileSpreadsheet,
   CheckSquare, 
   Calendar, 
   BarChart3, 
@@ -33,8 +34,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   pendingTasksCount = 12
 }) => {
   const menuItems: { id: NavTab; label: string; icon: React.ElementType; badge?: string }[] = [
-    { id: 'Goals & KPIs', label: 'Goals & KPIs', icon: Target, badge: 'Core' },
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'Google Sheets DB', label: 'Google Sheets DB', icon: FileSpreadsheet, badge: '11 Sheets' },
+    { id: 'Goals & KPIs', label: 'Goals & KPIs', icon: Target, badge: 'Core' },
     { id: 'Tasks', label: 'Tasks', icon: CheckSquare, badge: `${pendingTasksCount}+` },
     { id: 'Calendar', label: 'Calendar', icon: Calendar },
     { id: 'Analytics', label: 'Analytics', icon: BarChart3 },

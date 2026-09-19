@@ -1,5 +1,6 @@
 export type NavTab = 
   | 'Dashboard'
+  | 'Google Sheets DB'
   | 'Goals & KPIs'
   | 'Tasks'
   | 'Calendar'
@@ -34,6 +35,7 @@ export interface ProjectItem {
   iconBg: string;
   iconColor: string;
   status: 'In Progress' | 'Completed' | 'Pending';
+  priority?: string;
   buyerName?: string;
   budget?: string;
   location?: string;

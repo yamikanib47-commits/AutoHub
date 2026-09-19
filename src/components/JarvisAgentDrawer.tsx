@@ -13,6 +13,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { HQTask, LeadItem, VehicleRequest } from '../types';
+import { autoAceDAL } from '../services/dataAccessLayer';
 
 interface Message {
   id: string;
@@ -66,12 +67,17 @@ export const JarvisAgentDrawer: React.FC<JarvisAgentDrawerProps> = ({
     }
   }, [initialPrompt, isOpen]);
 
+  const dalMeta = autoAceDAL.getMetadata();
+
   const quickActionChips = [
-    { label: 'Diagnose Funnel Leaks', prompt: 'Evaluate the AutoAce 6-stage funnel (Attention -> Interest -> Intent -> Connection -> Transaction -> Revenue). Where are we currently leaking?' },
-    { label: 'Check 90-Day Targets', prompt: 'Review our progress against our 90-day working targets (20 buyer requests, 15 connections, 3+ deals, K5,000+ revenue).' },
-    { label: 'Prioritize Work', prompt: 'Using our primary business goals (Demand, Connections, Deals, Revenue), what should I prioritize today as Head Admin?' },
-    { label: 'Demand Content Script', prompt: 'Draft a Zambian automotive video hook and script designed to generate concrete buyer requests, not just empty views.' },
-    { label: 'Fulfillment Capacity', prompt: 'If buyer requests increase to 20/month, what seller and agent relationships do we need in Lusaka to prevent fulfillment bottlenecks?' }
+    { label: '🔥 Hot Buyers Waiting?', prompt: 'How many hot buyers are waiting?' },
+    { label: '⚠️ Buyers Without Agent?', prompt: 'Which buyers have no assigned agent?' },
+    { label: '📉 Non-Converting Listings?', prompt: "Which listings have interest but aren't converting?" },
+    { label: '🎬 Content Generating Demand?', prompt: 'Which content is generating actual buyer demand?' },
+    { label: '💰 Revenue Generated?', prompt: 'How much revenue has AutoAce generated?' },
+    { label: '👥 Agents Unresolved Leads?', prompt: 'Which agents have unresolved leads?' },
+    { label: '🔍 Biggest Funnel Leak?', prompt: 'Where is the biggest funnel leak?' },
+    { label: '🎯 90-Day Targets', prompt: 'Review our progress against our 90-day working targets (20 buyer requests, 15 connections, 3+ deals, K5,000+ revenue).' },
   ];
 
   const handleSendMessage = async (promptToSend?: string) => {
@@ -99,7 +105,8 @@ export const JarvisAgentDrawer: React.FC<JarvisAgentDrawerProps> = ({
             activeLeadsCount: leads.length,
             hotLeads: leads.filter((l) => l.status === 'HOT').map((l) => ({ name: l.name, car: l.vehicleInterest })),
             matchedRequests: requests.filter((r) => r.status === 'Matched').length,
-            uncompletedTasksCount: tasks.filter((t) => !t.completed).length
+            uncompletedTasksCount: tasks.filter((t) => !t.completed).length,
+            dalSummary: autoAceDAL.getLiveOperationalSummary()
           }
         })
       });
@@ -174,8 +181,18 @@ export const JarvisAgentDrawer: React.FC<JarvisAgentDrawerProps> = ({
                   JARVIS
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C8F169] text-[#1A1A1F]">
-                  Side Agent
+                  Operations AI
                 </span>
+                {dalMeta.isLive ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Live Sheets DAL
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-800 text-gray-300 border border-gray-700">
+                    Local DAL Seed
+                  </span>
+                )}
               </div>
               <p className="text-xs text-gray-400 font-medium">AutoAce Operations Intelligence</p>
             </div>

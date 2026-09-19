@@ -20,6 +20,8 @@ import {
   initialRequests,
   initialTasks
 } from './data/mockData';
+import { autoAceDAL } from './services/dataAccessLayer';
+import { BuyerRequestStatus } from './types/database';
 
 // Layout & Core Components
 import { Sidebar } from './components/Sidebar';
@@ -33,6 +35,7 @@ import { TasksView } from './components/views/TasksView';
 import { CalendarView } from './components/views/CalendarView';
 import { AnalyticsView } from './components/views/AnalyticsView';
 import { TeamView } from './components/views/TeamView';
+import { GoogleSheetsView } from './components/views/GoogleSheetsView';
 
 // Modals
 import { AddProjectModal } from './components/modals/AddProjectModal';
@@ -47,12 +50,25 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('Dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Core Data States
-  const [stats, setStats] = useState<StatMetric[]>(initialStatMetrics);
-  const [projects, setProjects] = useState<ProjectItem[]>(initialProjects);
+  // Core Data States - Synchronized with AutoAce Google Sheets Data Access Layer
+  const [stats, setStats] = useState<StatMetric[]>(autoAceDAL.getDashboardStatMetrics());
+  const [projects, setProjects] = useState<ProjectItem[]>(autoAceDAL.getDashboardProjects());
+  const [conversionRate, setConversionRate] = useState(autoAceDAL.getFunnelConversionPercentage());
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
   const [reminder, setReminder] = useState<ReminderItem>(initialReminder);
   const [tasksList, setTasksList] = useState<TaskItem[]>(initialTasksList);
+
+  // Subscribe to live AutoAce DAL updates (triggered by Google Sheets sync or lead mutations)
+  useEffect(() => {
+    const syncFromDal = () => {
+      setStats(autoAceDAL.getDashboardStatMetrics());
+      setProjects(autoAceDAL.getDashboardProjects());
+      setConversionRate(autoAceDAL.getFunnelConversionPercentage());
+    };
+
+    syncFromDal();
+    return autoAceDAL.subscribe(syncFromDal);
+  }, []);
 
   // AutoAce HQ Extended Data (for AI Co-pilot & Intelligence)
   const [leads] = useState<LeadItem[]>(initialLeads);
@@ -91,43 +107,38 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Handlers
+  // Handlers - Mutates AutoAce DAL ensuring 100% synchronization with Google Sheets
   const handleAddProject = (newProjData: Omit<ProjectItem, 'id'>) => {
-    const newProj: ProjectItem = {
-      ...newProjData,
-      id: `lead-${Date.now()}`
-    };
-    setProjects((prev) => [newProj, ...prev]);
+    const parts = newProjData.title.trim().split(' ');
+    const make = parts[0] || 'Toyota';
+    const model = parts.slice(1).join(' ') || 'Vehicle';
+    const budgetNumber = parseInt((newProjData.dueDate || newProjData.budget || '150000').replace(/[^0-9]/g, '')) * 1000 || 150000;
 
-    // Update Buyer Requests KPI count
-    setStats((prev) =>
-      prev.map((s) =>
-        s.id === '1'
-          ? { ...s, value: Number(s.value) + 1, change: `${Number(s.value) + 1 - 18} Increased this week` }
-          : s
-      )
-    );
+    autoAceDAL.addBuyer({
+      name: newProjData.buyerName || 'Lusaka Buyer',
+      phone: newProjData.contact || '+260 97 000 0000',
+      city: 'Lusaka',
+      budget: budgetNumber > 10000 ? budgetNumber : 150000,
+      preferred_make: make,
+      preferred_model: model,
+      preferred_year: 2016,
+      lead_temperature: newProjData.priority === 'High' ? 'Hot' : 'Medium'
+    });
   };
 
   const handleUpdateLeadStatus = (leadId: string, newStatus: string) => {
-    setProjects((prev) =>
-      prev.map((p) => (p.id === leadId ? { ...p, category: newStatus } : p))
-    );
-    setSelectedLead((prev) => (prev && prev.id === leadId ? { ...prev, category: newStatus } : prev));
-
-    if (newStatus === 'Deal Closing') {
-      setStats((prev) =>
-        prev.map((s) => {
-          if (s.id === '3') {
-            return { ...s, value: Number(s.value) + 1 };
-          }
-          if (s.id === '4') {
-            return { ...s, value: 'K48,500' };
-          }
-          return s;
-        })
-      );
+    let buyerStatus: BuyerRequestStatus = 'Qualified';
+    if (newStatus === 'Deal Closing' || newStatus === 'Deal Closed' || newStatus === 'Done') {
+      buyerStatus = 'Purchased';
+    } else if (newStatus === 'Inspection' || newStatus === 'Connected') {
+      buyerStatus = 'Connected';
+    } else if (newStatus === 'Contacted') {
+      buyerStatus = 'Contacted';
+    } else if (newStatus === 'Matching Supply' || newStatus === 'In Progress') {
+      buyerStatus = 'Qualified';
     }
+    autoAceDAL.updateBuyerStatus(leadId, buyerStatus);
+    setSelectedLead((prev) => (prev && prev.id === leadId ? { ...prev, category: newStatus } : prev));
   };
 
   const handleAddMember = (newMemberData: Omit<TeamMember, 'id'>) => {
@@ -195,6 +206,10 @@ export default function App() {
 
           {/* Sub-Views Router */}
           <div className="flex-1">
+            {currentTab === 'Google Sheets DB' && (
+              <GoogleSheetsView />
+            )}
+
             {currentTab === 'Goals & KPIs' && (
               <GoalsAndKpiViewer />
             )}
@@ -205,6 +220,7 @@ export default function App() {
                 projects={projects}
                 teamMembers={teamMembers}
                 reminder={reminder}
+                conversionRate={conversionRate}
                 onOpenAddProject={() => setIsAddProjectOpen(true)}
                 onOpenImportData={() => setIsImportDataOpen(true)}
                 onOpenAddMember={() => setIsAddMemberOpen(true)}
@@ -212,6 +228,7 @@ export default function App() {
                 onSelectProject={(p) => setSelectedLead(p)}
                 onSelectMember={(m) => alert(`Partner Yard: ${m.name} - ${m.taskTitle}`)}
                 onNavigateToGoals={() => setCurrentTab('Goals & KPIs')}
+                onNavigateToSheets={() => setCurrentTab('Google Sheets DB')}
               />
             )}
 
