@@ -34,7 +34,7 @@ type SheetTab =
   | 'jarvis_queries';
 
 export const GoogleSheetsView: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'tables' | 'jarvis' | 'schema'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'tables' | 'jarvis' | 'schema'>('tables');
   const [activeTable, setActiveTable] = useState<SheetTab>('buyers');
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
@@ -106,7 +106,7 @@ export const GoogleSheetsView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1A1A1F] tracking-tight">
-            Google Sheets Database
+            Data Sync
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">
             11 relational operational tables, dynamic formula cells & Jarvis reasoning data layer
@@ -142,17 +142,6 @@ export const GoogleSheetsView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 p-1 bg-white rounded-full border border-gray-100 shadow-2xs overflow-x-auto">
           <button
-            onClick={() => setActiveSection('dashboard')}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-              activeSection === 'dashboard'
-                ? 'bg-[#1E3A8A] text-white shadow-xs'
-                : 'text-gray-600 hover:text-[#1A1A1F] hover:bg-gray-50'
-            }`}
-          >
-            Dashboard Formulas
-          </button>
-
-          <button
             onClick={() => setActiveSection('tables')}
             className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
               activeSection === 'tables'
@@ -166,6 +155,17 @@ export const GoogleSheetsView: React.FC = () => {
             }`}>
               11
             </span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('dashboard')}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeSection === 'dashboard'
+                ? 'bg-[#1E3A8A] text-white shadow-xs'
+                : 'text-gray-600 hover:text-[#1A1A1F] hover:bg-gray-50'
+            }`}
+          >
+            Metrics Summary
           </button>
 
           <button
@@ -244,39 +244,39 @@ export const GoogleSheetsView: React.FC = () => {
           </div>
         )}
 
-        {/* TAB CONTENT: Dashboard Formulas */}
+        {/* TAB CONTENT: Metrics Summary */}
         {activeSection === 'dashboard' && (
           <div className="p-6 sm:p-7 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="p-5 rounded-2xl bg-[#1E3A8A] text-white shadow-xs">
                 <div className="text-xs font-semibold text-white/80">AutoAce Net Revenue</div>
                 <div className="text-3xl font-extrabold tracking-tight mt-1">K31,800</div>
-                <div className="text-[11px] font-mono text-blue-200 mt-2 bg-white/10 px-2 py-0.5 rounded w-fit">
-                  =B3 - B4 (50% Split)
+                <div className="text-[11px] font-medium text-blue-100 mt-2 bg-white/10 px-2 py-0.5 rounded w-fit">
+                  50% Net Profit Split
                 </div>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-gray-100 shadow-2xs">
                 <div className="text-xs font-semibold text-gray-400">Gross Commission</div>
                 <div className="text-3xl font-extrabold text-[#1A1A1F] tracking-tight mt-1">K63,600</div>
-                <div className="text-[11px] font-mono text-gray-500 mt-2 bg-gray-50 px-2 py-0.5 rounded w-fit border border-gray-100">
-                  =SUM(transactions!H2:H11)
+                <div className="text-[11px] font-medium text-gray-600 mt-2 bg-gray-50 px-2 py-0.5 rounded w-fit border border-gray-100">
+                  3% Fee on Closed Deals
                 </div>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-gray-100 shadow-2xs">
-                <div className="text-xs font-semibold text-gray-400">Hot Unassigned Leads</div>
+                <div className="text-xs font-semibold text-gray-400">Hot Priority Leads</div>
                 <div className="text-3xl font-extrabold text-[#1A1A1F] tracking-tight mt-1">2 Leads</div>
-                <div className="text-[11px] font-mono text-amber-700 mt-2 bg-amber-50 px-2 py-0.5 rounded w-fit border border-amber-100">
-                  =COUNTIFS(buyers!L:L, "Hot")
+                <div className="text-[11px] font-medium text-amber-700 mt-2 bg-amber-50 px-2 py-0.5 rounded w-fit border border-amber-100">
+                  Urgent Matching Required
                 </div>
               </div>
 
               <div className="p-5 rounded-2xl bg-white border border-gray-100 shadow-2xs">
                 <div className="text-xs font-semibold text-gray-400">Connection Conversion</div>
                 <div className="text-3xl font-extrabold text-[#1A1A1F] tracking-tight mt-1">33.3%</div>
-                <div className="text-[11px] font-mono text-blue-700 mt-2 bg-blue-50 px-2 py-0.5 rounded w-fit border border-blue-100">
-                  =10 Deals / 30 Connections
+                <div className="text-[11px] font-medium text-blue-700 mt-2 bg-blue-50 px-2 py-0.5 rounded w-fit border border-blue-100">
+                  10 Deals of 30 Connections
                 </div>
               </div>
             </div>
@@ -284,31 +284,48 @@ export const GoogleSheetsView: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-[#1A1A1F]">
-                  Spreadsheet Formula Calculations (Dynamic Evaluation)
+                  Executive Operational Metrics
                 </h3>
-                <span className="text-xs text-gray-400">Maintained in 'dashboard_formulas' tab</span>
+                <span className="text-xs text-gray-400">AutoAce performance indicators</span>
               </div>
               <div className="overflow-x-auto border border-gray-100 rounded-2xl">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-gray-50/70 text-gray-500 font-semibold border-b border-gray-100">
                     <tr>
-                      <th className="py-3 px-4 w-16 text-gray-400 font-mono">Cell</th>
                       <th className="py-3 px-4">Metric Name</th>
-                      <th className="py-3 px-4">Google Sheets Formula</th>
-                      <th className="py-3 px-4">Evaluated Value</th>
-                      <th className="py-3 px-4">Business Explanation</th>
+                      <th className="py-3 px-4">Current Value</th>
+                      <th className="py-3 px-4">Calculation Method</th>
+                      <th className="py-3 px-4">Operational Notes</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {autoAceDatabase.dashboard_formulas.map((row) => (
-                      <tr key={row.cell} className="hover:bg-gray-50/60 transition-colors">
-                        <td className="py-3 px-4 font-mono font-bold text-[#1E3A8A] bg-blue-50/30">{row.cell}</td>
-                        <td className="py-3 px-4 font-semibold text-gray-900">{row.metric_name}</td>
-                        <td className="py-3 px-4 font-mono text-gray-700 bg-gray-50/50">{row.formula}</td>
-                        <td className="py-3 px-4 font-bold text-[#1A1A1F]">{row.calculated_value}</td>
-                        <td className="py-3 px-4 text-gray-500">{row.notes}</td>
-                      </tr>
-                    ))}
+                    {autoAceDatabase.dashboard_formulas.map((row) => {
+                      let readableCalculation = row.notes;
+                      if (row.metric_name.includes('GMV') || row.metric_name.includes('Gross Merchandise')) {
+                        readableCalculation = 'Sum of all completed vehicle transaction values';
+                      } else if (row.metric_name.includes('Gross Commission')) {
+                        readableCalculation = '3% broker fee calculated on closed sales';
+                      } else if (row.metric_name.includes('Partner Payout')) {
+                        readableCalculation = '50% broker split distributed to partner agent yards';
+                      } else if (row.metric_name.includes('Net Revenue')) {
+                        readableCalculation = 'Gross Commission minus Partner Payouts and Costs';
+                      } else if (row.metric_name.includes('Active Inventory')) {
+                        readableCalculation = 'Count of active verified vehicle listings in network';
+                      } else if (row.metric_name.includes('Hot Unassigned')) {
+                        readableCalculation = 'Inquiries flagged as Hot requiring immediate dealer assignment';
+                      } else if (row.metric_name.includes('Conversion')) {
+                        readableCalculation = 'Closed vehicle deals divided by total connections';
+                      }
+
+                      return (
+                        <tr key={row.cell} className="hover:bg-gray-50/60 transition-colors">
+                          <td className="py-3 px-4 font-semibold text-gray-900">{row.metric_name}</td>
+                          <td className="py-3 px-4 font-bold text-[#1E3A8A]">{row.calculated_value}</td>
+                          <td className="py-3 px-4 text-gray-600">{readableCalculation}</td>
+                          <td className="py-3 px-4 text-gray-500">{row.notes}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

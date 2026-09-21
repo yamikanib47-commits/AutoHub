@@ -81,7 +81,8 @@ Do not optimize for activity simply because activity is increasing.
 Always ask: Is this helping AutoAce generate demand, create connections, close deals, or generate revenue?
 If not, it should not become a major KPI.
 
-Tone: Concise, practical, analytical, calm, and grounded in the Zambian automotive ecosystem (Lusaka car yards, Kafue Rd/Great East Rd dealers, Japanese vehicle import brokers, mobile money/bank transfers, Kwacha economics).`;
+Tone: Concise, practical, analytical, calm, and grounded in the Zambian automotive ecosystem (Lusaka car yards, Kafue Rd/Great East Rd dealers, Japanese vehicle import brokers, mobile money/bank transfers, Kwacha economics).
+Output Formatting: Always format your answers using clean, structured Markdown. Use Markdown tables (| Column | Column |) for tabular comparisons, clear headings (###), bold for key metrics and numbers, bullet points, and horizontal dividers (---) to ensure effortless scanning.`;
 
 // 1. Health check
 app.get("/api/health", (req, res) => {
@@ -183,23 +184,52 @@ ${listingsStr}
     } else if (lower.includes("content") && (lower.includes("demand") || lower.includes("generating") || lower.includes("buyer"))) {
       if (dal?.contentDemand) {
         const cd = dal.contentDemand;
-        const driversStr = cd.topDrivers?.map((c: any) => `• **${c.topic}** [${c.platform}]: **${c.requests} buyer requests** generated, resulting in **${c.sales} completed vehicle sales**.`).join('\n') || '';
-        const vanityStr = cd.vanityList?.map((c: any) => `• **${c.topic}** (${c.views.toLocaleString()} views, but **${c.requests} buyer requests**)`).join('\n') || '';
+        const rows = cd.topDrivers?.map((c: any, idx: number) => 
+          `| **CT00${idx + 1}** | ${c.platform} | *${c.topic}* | **${c.requests}** | **${c.sales}** | High-intent buyer demand |`
+        ).join('\n') || '';
 
-        fallbackReply = `**JARVIS Content Intelligence: Demand vs Vanity Analysis**
+        const vanityRows = cd.vanityList?.map((c: any) => 
+          `- **${c.topic}**: **${c.views.toLocaleString()} views** → **${c.requests} requests**`
+        ).join('\n') || '- *No vanity content currently flagged.*';
 
-• **Total Buyer Demand Generated from Content:** **${cd.totalRequests} verified buyer requests**
-• **Total Deals Closed from Content:** **${cd.totalSales} transactions**
+        fallbackReply = `Here is the breakdown of content driving **actual buyer intent and closed deals**, versus vanity entertainment that is burning reach without capturing demand.
 
-**Top Demand-Generating Content:**
-${driversStr}
+---
 
-**Vanity Content Alert (High views, zero business outcome):**
-${vanityStr || '• None flagged above 20,000 views without requests.'}
+### **Top Demand & Revenue Drivers**
+These pieces directly generated **${cd.totalRequests} buyer requests** and **${cd.totalSales} closed vehicle sales**:
 
-*Cardinal Rule:* Double down on vehicle comparison and inspection traps. Discontinue generic exotic car reels that produce zero Zambian Kwacha revenue.`;
+| ID | Platform | Topic / Asset | Buyer Requests | Closed Deals | Intent Profile |
+| :--- | :--- | :--- | :---: | :---: | :--- |
+${rows}
+
+*Across the entire catalog, conversion-focused content has generated **${cd.totalRequests} total requests** and **${cd.totalSales} total sales**.*
+
+---
+
+### **The Vanity Trap (High Views, Zero Demand)**
+In line with our cardinal rule (*views and followers are supporting metrics only, never primary KPIs*), here is where attention failed to convert:
+
+${vanityRows}
+
+---
+
+### **JARVIS Operational Takeaways:**
+1. **Utility & Economics Outperform Entertainment:** Zambian buyers submit intent when content solves a practical financial equation (e.g., landed cost calculations, fuel efficiency, farm workhorse comparisons).
+2. **Platform Focus:** YouTube & Facebook deliver our highest converting transactional intent in Zambia. TikTok converts best when highlighting physical walkthroughs at local Lusaka yards.
+3. **Action:** Direct production away from viral memes and replicate high-intent landed cost and utility formats.`;
       } else {
-        fallbackReply = `**JARVIS Content Analysis:** Video 'Toyota RunX vs Dualis Lusaka Price Breakdown' is the #1 demand driver with 8 buyer requests and 2 closed sales.`;
+        fallbackReply = `Here is the breakdown of content driving **actual buyer intent and closed deals**:
+
+| ID | Platform | Topic / Asset | Buyer Requests | Closed Deals | Intent Profile |
+| :--- | :--- | :--- | :---: | :---: | :--- |
+| **CT005** | YouTube | *Importing Prado TX 150 from Japan to Zambia* | **6** | **2** | High-ticket import brokerage |
+| **CT003** | Facebook | *Affordable First Cars Under K100k in Zambia* | **5** | **1** | Liquid budget entry-level buyers |
+| **CT001** | TikTok | *Yard Walkthrough: Land Cruiser Prado TX in Lusaka* | **4** | **1** | Local yard-ready luxury buyers |
+| **CT007** | Facebook | *Farmer & Contractor Pickups: Hilux vs D-Max* | **4** | **1** | Commercial / Agro workhorses |
+| **CT013** | Facebook | *Fuel Savers for Bolt & Yango Drivers in Lusaka* | **4** | **1** | Commercial ride-hailing demand |
+
+*Conversion-focused content generated **23 total requests** and **6 total sales**.*`;
       }
     } else if (lower.includes("revenue") || lower.includes("how much") || lower.includes("money") || lower.includes("generated")) {
       if (dal?.revenue) {

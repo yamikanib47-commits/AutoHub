@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { HQTask, LeadItem, VehicleRequest } from '../types';
 import { autoAceDAL } from '../services/dataAccessLayer';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface Message {
   id: string;
@@ -168,7 +169,7 @@ export const JarvisAgentDrawer: React.FC<JarvisAgentDrawerProps> = ({
       />
 
       {/* Drawer Panel */}
-      <div className="relative w-full max-w-lg bg-white h-full flex flex-col shadow-2xl z-10 border-l border-gray-200 animate-in slide-in-from-right duration-200">
+      <div className="relative w-full max-w-xl sm:max-w-2xl bg-white h-full flex flex-col shadow-2xl z-10 border-l border-gray-200 animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="p-4 sm:p-5 bg-[#1A1A1F] text-white flex items-center justify-between border-b border-gray-800">
           <div className="flex items-center gap-3">
@@ -242,13 +243,17 @@ export const JarvisAgentDrawer: React.FC<JarvisAgentDrawerProps> = ({
                 )}
 
                 <div
-                  className={`max-w-[85%] rounded-2xl p-3.5 text-xs sm:text-sm leading-relaxed ${
+                  className={`max-w-[90%] rounded-2xl p-3.5 text-xs sm:text-sm leading-relaxed overflow-hidden ${
                     isUser
                       ? 'bg-[#2D5CF6] text-white rounded-tr-none shadow-xs font-medium'
                       : 'bg-white text-[#1A1A1F] border border-gray-200/90 rounded-tl-none shadow-2xs'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">{msg.text}</div>
+                  {isUser ? (
+                    <div className="whitespace-pre-wrap">{msg.text}</div>
+                  ) : (
+                    <MarkdownRenderer content={msg.text} variant="light" />
+                  )}
                   
                   {/* Footer actions on JARVIS responses */}
                   {!isUser && (

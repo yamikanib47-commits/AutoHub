@@ -14,6 +14,7 @@ import {
   Flame
 } from 'lucide-react';
 import { ContentItem } from '../../types';
+import { MarkdownRenderer } from '../MarkdownRenderer';
 
 interface ContentCenterViewProps {
   contentList: ContentItem[];
@@ -201,8 +202,8 @@ export const ContentCenterView: React.FC<ContentCenterViewProps> = ({
                 </button>
               </div>
 
-              <div className="whitespace-pre-wrap text-gray-200 leading-relaxed font-normal">
-                {generatedResult}
+              <div className="leading-relaxed font-normal overflow-hidden">
+                <MarkdownRenderer content={generatedResult} variant="dark" />
               </div>
 
               <div className="pt-2 flex justify-end">

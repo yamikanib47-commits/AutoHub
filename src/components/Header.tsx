@@ -7,6 +7,10 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onToggleJarvis?: () => void;
+  onOpenNotifications?: () => void;
+  onOpenMessages?: () => void;
+  unreadNotificationsCount?: number;
+  unreadMessagesCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,7 +18,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSearch,
   searchQuery,
   onSearchChange,
-  onToggleJarvis
+  onToggleJarvis,
+  onOpenNotifications,
+  onOpenMessages,
+  unreadNotificationsCount = 0,
+  unreadMessagesCount = 0
 }) => {
   return (
     <header className="flex items-center justify-between gap-4 py-2 mb-6">
@@ -49,21 +57,32 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3">
         {/* Mail circle button */}
         <button
-          onClick={() => alert('Messages inbox opened')}
-          className="w-10 h-10 rounded-full bg-white border border-gray-200/80 shadow-2xs flex items-center justify-center text-gray-600 hover:text-[#2D5CF6] hover:bg-gray-50 transition-colors cursor-pointer"
-          aria-label="Messages"
+          onClick={onOpenMessages}
+          className="w-10 h-10 rounded-full bg-white border border-gray-200/80 shadow-2xs flex items-center justify-center text-gray-600 hover:text-[#2D5CF6] hover:bg-gray-50 transition-colors cursor-pointer relative"
+          aria-label={`Messages (${unreadMessagesCount} unread)`}
+          title="Team Messages & Dispatch"
         >
           <Mail className="w-4 h-4" />
+          {unreadMessagesCount > 0 && (
+            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500 text-white text-[10px] font-black absolute -top-1 -right-1 ring-2 ring-white flex items-center justify-center shadow-xs animate-in zoom-in-50">
+              {unreadMessagesCount}
+            </span>
+          )}
         </button>
 
-        {/* Bell circle button with notification dot */}
+        {/* Bell circle button with notification count */}
         <button
-          onClick={() => alert('You have 3 unread project updates')}
+          onClick={onOpenNotifications}
           className="w-10 h-10 rounded-full bg-white border border-gray-200/80 shadow-2xs flex items-center justify-center text-gray-600 hover:text-[#2D5CF6] hover:bg-gray-50 transition-colors cursor-pointer relative"
-          aria-label="Notifications"
+          aria-label={`Notifications (${unreadNotificationsCount} unread)`}
+          title="Notification Center & Browser Alerts"
         >
           <Bell className="w-4 h-4" />
-          <span className="w-2 h-2 rounded-full bg-rose-500 absolute top-2.5 right-2.5 ring-2 ring-white" />
+          {unreadNotificationsCount > 0 && (
+            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#1E3A8A] text-white text-[10px] font-black absolute -top-1 -right-1 ring-2 ring-white flex items-center justify-center shadow-xs animate-in zoom-in-50">
+              {unreadNotificationsCount}
+            </span>
+          )}
         </button>
 
         {/* User Profile Pill */}
@@ -87,10 +106,10 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onToggleJarvis}
             title="Open AI Assistant (⌘J)"
-            className="hidden xl:flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#1E3A8A] text-white text-xs font-bold hover:bg-[#2563EB] transition-colors shadow-2xs cursor-pointer ml-1"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-full bg-[#1E3A8A] text-white text-xs font-bold hover:bg-[#2563EB] transition-colors shadow-2xs cursor-pointer ml-1 shrink-0"
           >
             <Bot className="w-3.5 h-3.5 text-[#93C5FD]" />
-            <span>AI Co-Pilot</span>
+            <span className="hidden sm:inline">AI Co-Pilot</span>
           </button>
         )}
       </div>

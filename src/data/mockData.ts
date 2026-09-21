@@ -49,13 +49,13 @@ export const statMetrics: StatMetric[] = [
 ];
 
 export const projectAnalyticsData: DayAnalytic[] = [
-  { day: 'S', value: 48, type: 'hatched' },
-  { day: 'M', value: 72, type: 'solid-light' },
-  { day: 'T', value: 64, type: 'solid-light', tooltip: '74% Intent Rate' },
-  { day: 'W', value: 96, type: 'solid-dark' },
-  { day: 'T', value: 68, type: 'hatched' },
-  { day: 'F', value: 52, type: 'hatched' },
-  { day: 'S', value: 58, type: 'hatched' }
+  { day: 'S', fullDay: 'Sunday', value: 48, inquiries: 16, region: 'Lusaka & Ndola', type: 'hatched', tooltip: '16 Inquiries' },
+  { day: 'M', fullDay: 'Monday', value: 72, inquiries: 34, region: 'Kafue Rd Corridor', type: 'solid-light', tooltip: '34 Inquiries' },
+  { day: 'T', fullDay: 'Tuesday', value: 64, inquiries: 28, region: 'Copperbelt Fleet', type: 'solid-light', tooltip: '74% Intent Rate' },
+  { day: 'W', fullDay: 'Wednesday', value: 96, inquiries: 52, region: 'Great East Midweek Peak', type: 'solid-dark', tooltip: '52 Inquiries (Peak)' },
+  { day: 'T', fullDay: 'Thursday', value: 68, inquiries: 30, region: 'Kitwe & Livingstone', type: 'hatched', tooltip: '30 Inquiries' },
+  { day: 'F', fullDay: 'Friday', value: 84, inquiries: 42, region: 'Weekend Deal Rush', type: 'solid-light', tooltip: '42 Inquiries' },
+  { day: 'S', fullDay: 'Saturday', value: 58, inquiries: 22, region: 'Yard Walk-ins', type: 'hatched', tooltip: '22 Inquiries' }
 ];
 
 export const initialProjects: ProjectItem[] = [

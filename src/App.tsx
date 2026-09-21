@@ -36,6 +36,14 @@ import { CalendarView } from './components/views/CalendarView';
 import { AnalyticsView } from './components/views/AnalyticsView';
 import { TeamView } from './components/views/TeamView';
 import { GoogleSheetsView } from './components/views/GoogleSheetsView';
+import { NotificationCenterView } from './components/views/NotificationCenterView';
+
+// Notification System & Modals
+import { NotificationToastContainer } from './components/NotificationToastContainer';
+import { NotificationCenterModal } from './components/modals/NotificationCenterModal';
+import { TeamMessagesModal } from './components/modals/TeamMessagesModal';
+import { notificationService } from './services/notificationService';
+import { HQNotification } from './types';
 
 // Modals
 import { AddProjectModal } from './components/modals/AddProjectModal';
@@ -86,6 +94,27 @@ export default function App() {
   const [isImportDataOpen, setIsImportDataOpen] = useState(false);
   const [isMobileAppOpen, setIsMobileAppOpen] = useState(false);
   const [isSearchPaletteOpen, setIsSearchPaletteOpen] = useState(false);
+  const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+  const [isTeamMessagesOpen, setIsTeamMessagesOpen] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState({ notifications: 0, messages: 0 });
+  const [notificationsList, setNotificationsList] = useState<HQNotification[]>(notificationService.getNotifications());
+
+  // Listen to live unread counts and notifications from notification service
+  useEffect(() => {
+    const unsubUnread = notificationService.subscribeToUnreadCounts(setUnreadCounts);
+    const unsubNotifs = notificationService.subscribeToNotifications(setNotificationsList);
+    return () => {
+      unsubUnread();
+      unsubNotifs();
+    };
+  }, []);
+
+  const handleOpenProjectById = (projectId: string) => {
+    const found = projects.find((p) => p.id === projectId);
+    if (found) {
+      setSelectedLead(found);
+    }
+  };
 
   // JARVIS Drawer state
   const [isJarvisOpen, setIsJarvisOpen] = useState(false);
@@ -124,9 +153,21 @@ export default function App() {
       preferred_year: 2016,
       lead_temperature: newProjData.priority === 'High' ? 'Hot' : 'Medium'
     });
+
+    // Alert team and dispatch browser notification for new project
+    notificationService.notifyProjectStatusUpdated({
+      projectId: `lead-${Date.now()}`,
+      projectTitle: newProjData.title,
+      oldStatus: 'Inbound Intake',
+      newStatus: newProjData.category || 'Matching Supply',
+      buyerName: newProjData.buyerName,
+    });
   };
 
   const handleUpdateLeadStatus = (leadId: string, newStatus: string) => {
+    const existingProject = projects.find((p) => p.id === leadId);
+    const oldStatus = existingProject?.category || 'Active';
+
     let buyerStatus: BuyerRequestStatus = 'Qualified';
     if (newStatus === 'Deal Closing' || newStatus === 'Deal Closed' || newStatus === 'Done') {
       buyerStatus = 'Purchased';
@@ -139,6 +180,20 @@ export default function App() {
     }
     autoAceDAL.updateBuyerStatus(leadId, buyerStatus);
     setSelectedLead((prev) => (prev && prev.id === leadId ? { ...prev, category: newStatus } : prev));
+
+    // DISPATCH BROWSER NOTIFICATION & IN-APP TOAST
+    notificationService.notifyProjectStatusUpdated({
+      projectId: leadId,
+      projectTitle: existingProject?.title || 'Vehicle Project',
+      oldStatus,
+      newStatus,
+      buyerName: existingProject?.buyerName,
+      onClick: () => {
+        if (existingProject) {
+          setSelectedLead({ ...existingProject, category: newStatus });
+        }
+      }
+    });
   };
 
   const handleAddMember = (newMemberData: Omit<TeamMember, 'id'>) => {
@@ -188,6 +243,11 @@ export default function App() {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
           onOpenMobileAppModal={() => setIsMobileAppOpen(true)}
           pendingTasksCount={pendingTasksCount}
+          unreadNotificationsCount={unreadCounts.notifications}
+          onOpenJarvis={() => {
+            setJarvisInitialPrompt(undefined);
+            setIsJarvisOpen(true);
+          }}
         />
 
         {/* Main Dashboard / View Area */}
@@ -202,16 +262,38 @@ export default function App() {
               setJarvisInitialPrompt(undefined);
               setIsJarvisOpen(true);
             }}
+            onOpenNotifications={() => setIsNotificationCenterOpen(true)}
+            onOpenMessages={() => setIsTeamMessagesOpen(true)}
+            unreadNotificationsCount={unreadCounts.notifications}
+            unreadMessagesCount={unreadCounts.messages}
           />
 
           {/* Sub-Views Router */}
           <div className="flex-1">
-            {currentTab === 'Google Sheets DB' && (
+            {(currentTab === 'Data Sync' || currentTab === 'Google Sheets DB') && (
               <GoogleSheetsView />
             )}
 
             {currentTab === 'Goals & KPIs' && (
               <GoalsAndKpiViewer />
+            )}
+
+            {currentTab === 'Notifications' && (
+              <NotificationCenterView
+                notifications={notificationsList}
+                onMarkAllRead={() => notificationService.markAllNotificationsAsRead()}
+                onSelectNotification={(n) => {
+                  notificationService.markNotificationAsRead(n.id);
+                  if (n.type === 'project' && n.metadata?.projectId) {
+                    handleOpenProjectById(n.metadata.projectId);
+                  } else if (n.type === 'message') {
+                    setIsTeamMessagesOpen(true);
+                  }
+                }}
+                onSelectTab={(tab) => setCurrentTab(tab as any)}
+                onSelectProject={handleOpenProjectById}
+                onOpenMessages={() => setIsTeamMessagesOpen(true)}
+              />
             )}
 
             {currentTab === 'Dashboard' && (
@@ -228,7 +310,7 @@ export default function App() {
                 onSelectProject={(p) => setSelectedLead(p)}
                 onSelectMember={(m) => alert(`Partner Yard: ${m.name} - ${m.taskTitle}`)}
                 onNavigateToGoals={() => setCurrentTab('Goals & KPIs')}
-                onNavigateToSheets={() => setCurrentTab('Google Sheets DB')}
+                onNavigateToSheets={() => setCurrentTab('Data Sync')}
               />
             )}
 
@@ -341,6 +423,31 @@ export default function App() {
         isOpen={!!selectedLead}
         onClose={() => setSelectedLead(null)}
         onUpdateStatus={handleUpdateLeadStatus}
+      />
+
+      {/* Notification Center Popover & Browser Alert Management */}
+      <NotificationCenterModal
+        isOpen={isNotificationCenterOpen}
+        onClose={() => setIsNotificationCenterOpen(false)}
+        onSelectProject={handleOpenProjectById}
+        onOpenMessages={() => {
+          setIsNotificationCenterOpen(false);
+          setIsTeamMessagesOpen(true);
+        }}
+      />
+
+      {/* Team Dispatch & Messages Modal */}
+      <TeamMessagesModal
+        isOpen={isTeamMessagesOpen}
+        onClose={() => setIsTeamMessagesOpen(false)}
+        projects={projects}
+        onSelectProject={handleOpenProjectById}
+      />
+
+      {/* High-Visibility Floating Browser Notification Toast Container */}
+      <NotificationToastContainer
+        onOpenProject={handleOpenProjectById}
+        onOpenMessages={() => setIsTeamMessagesOpen(true)}
       />
     </div>
   );

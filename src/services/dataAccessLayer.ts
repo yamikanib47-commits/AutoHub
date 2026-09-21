@@ -558,7 +558,7 @@ export class AutoAceDataAccessLayer {
         id: '1',
         title: 'Buyer Requests',
         value: buyersCount,
-        change: 'Target: 30/mo • Formula =COUNTA(buyers!A2:A)',
+        change: 'Target: 30 / month',
         isPrimary: true,
         trend: 'up'
       },
@@ -566,21 +566,21 @@ export class AutoAceDataAccessLayer {
         id: '2',
         title: 'Qualified Connections',
         value: connectionsCount,
-        change: 'Target: 25/mo • Formula =COUNTA(connections!A2:A)',
+        change: 'Target: 25 / month',
         trend: 'up'
       },
       {
         id: '3',
         title: 'Closed Deals',
         value: dealsCount,
-        change: 'Target: 12/mo • Formula =COUNTA(transactions!A2:A)',
+        change: 'Target: 12 / month',
         trend: 'up'
       },
       {
         id: '4',
         title: 'AutoAce Net Revenue',
         value: `K${rev.netRevenue.toLocaleString()}`,
-        change: `Gross: K${rev.grossCommission.toLocaleString()} • Formula =B3-B4`,
+        change: `Gross Commission: K${rev.grossCommission.toLocaleString()}`,
         trend: 'up'
       }
     ];

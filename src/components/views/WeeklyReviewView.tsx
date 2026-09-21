@@ -10,6 +10,7 @@ import {
   Save, 
   CheckCircle2 
 } from 'lucide-react';
+import { MarkdownRenderer } from '../MarkdownRenderer';
 
 interface WeeklyReviewViewProps {
   onAskJarvis: (prompt: string) => void;
@@ -127,8 +128,8 @@ export const WeeklyReviewView: React.FC<WeeklyReviewViewProps> = ({ onAskJarvis 
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs sm:text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">
-            {generatedBriefing}
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs sm:text-sm leading-relaxed overflow-hidden">
+            <MarkdownRenderer content={generatedBriefing} variant="dark" />
           </div>
         </div>
       )}

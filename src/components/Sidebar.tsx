@@ -7,12 +7,14 @@ import {
   Calendar, 
   BarChart3, 
   Users, 
+  Bell,
   Settings, 
   HelpCircle, 
   LogOut,
   Sparkles,
   X,
-  Smartphone
+  Smartphone,
+  Bot
 } from 'lucide-react';
 import { NavTab } from '../types';
 
@@ -23,6 +25,8 @@ interface SidebarProps {
   onCloseMobile: () => void;
   onOpenMobileAppModal: () => void;
   pendingTasksCount?: number;
+  unreadNotificationsCount?: number;
+  onOpenJarvis?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -31,16 +35,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpenMobile,
   onCloseMobile,
   onOpenMobileAppModal,
-  pendingTasksCount = 12
+  pendingTasksCount = 12,
+  unreadNotificationsCount = 0,
+  onOpenJarvis
 }) => {
   const menuItems: { id: NavTab; label: string; icon: React.ElementType; badge?: string }[] = [
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'Google Sheets DB', label: 'Google Sheets DB', icon: FileSpreadsheet, badge: '11 Sheets' },
-    { id: 'Goals & KPIs', label: 'Goals & KPIs', icon: Target, badge: 'Core' },
-    { id: 'Tasks', label: 'Tasks', icon: CheckSquare, badge: `${pendingTasksCount}+` },
+    { id: 'Data Sync', label: 'Data Sync', icon: FileSpreadsheet, badge: '11' },
+    { id: 'Goals & KPIs', label: 'Goals & KPIs', icon: Target },
+    { id: 'Tasks', label: 'Tasks', icon: CheckSquare, badge: `${pendingTasksCount}` },
     { id: 'Calendar', label: 'Calendar', icon: Calendar },
     { id: 'Analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'Team', label: 'Team', icon: Users },
+    { 
+      id: 'Notifications', 
+      label: 'Notifications', 
+      icon: Bell, 
+      badge: unreadNotificationsCount > 0 ? `${unreadNotificationsCount}` : undefined 
+    },
   ];
 
   const generalItems: { id: NavTab; label: string; icon: React.ElementType }[] = [
@@ -99,6 +111,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
+          {/* AI Bot Co-Pilot Button for smaller devices */}
+          {onOpenJarvis && (
+            <div className="xl:hidden mb-5">
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenJarvis();
+                  onCloseMobile();
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#1E3A8A] via-[#1e40af] to-[#2563EB] text-white shadow-xs hover:shadow-md transition-all active:scale-98 group cursor-pointer border border-blue-400/25"
+                title="Launch JARVIS AI Co-Pilot"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur-xs">
+                    <Bot className="w-4 h-4 text-[#93C5FD] group-hover:scale-110 transition-transform" />
+                  </div>
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold leading-tight">AI Co-Pilot</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8F169] animate-pulse" />
+                    </div>
+                    <span className="text-[10px] text-blue-200">JARVIS Assistant</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/20">
+                  Ask AI
+                </span>
+              </button>
+            </div>
+          )}
+
           {/* MENU Section */}
           <div className="space-y-1">
             <p className="text-[11px] font-bold text-gray-400 tracking-wider px-3 mb-2 uppercase">
@@ -107,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <nav className="space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = currentTab === item.id;
+                const isActive = currentTab === item.id || (item.id === 'Data Sync' && currentTab === 'Google Sheets DB');
                 return (
                   <div key={item.id} className="relative flex items-center">
                     {/* Active Left Indicator Bar in Primary Blue */}

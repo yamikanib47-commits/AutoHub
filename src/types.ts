@@ -1,11 +1,13 @@
 export type NavTab = 
   | 'Dashboard'
+  | 'Data Sync'
   | 'Google Sheets DB'
   | 'Goals & KPIs'
   | 'Tasks'
   | 'Calendar'
   | 'Analytics'
   | 'Team'
+  | 'Notifications'
   | 'Settings'
   | 'Help';
 
@@ -25,6 +27,9 @@ export interface DayAnalytic {
   value: number; // percentage height (0 - 100)
   type: 'hatched' | 'solid-light' | 'solid-dark';
   tooltip?: string;
+  fullDay?: string;
+  inquiries?: number;
+  region?: string;
 }
 
 export interface ProjectItem {
@@ -156,7 +161,7 @@ export interface ContentItem {
   views?: string;
 }
 
-export type NotificationType = 'lead' | 'content' | 'followup' | 'jarvis' | 'system';
+export type NotificationType = 'lead' | 'content' | 'followup' | 'jarvis' | 'system' | 'project' | 'message';
 
 export interface HQNotification {
   id: string;
@@ -167,6 +172,30 @@ export interface HQNotification {
   read: boolean;
   actionLabel?: string;
   actionTab?: HQTab;
+  metadata?: {
+    projectId?: string;
+    projectTitle?: string;
+    senderId?: string;
+    senderName?: string;
+    senderAvatar?: string;
+    statusChange?: {
+      oldStatus?: string;
+      newStatus: string;
+    };
+  };
+}
+
+export interface TeamMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar: string;
+  senderRole: string;
+  text: string;
+  timestamp: string;
+  read: boolean;
+  projectId?: string;
+  projectTitle?: string;
 }
 
 export interface AutomationIntegration {
